@@ -15,7 +15,7 @@ public class PipelinePanel extends JPanel {
 
     private final String[] stepTitles = {
             "Structure",
-            "Graph Analysis",
+            "Graph Prediction",
             "Domain Detection",
             "Results"
     };
@@ -94,7 +94,7 @@ public class PipelinePanel extends JPanel {
         // Sidebar title
         g.setFont(AppTheme.SMALL_BOLD);
         g.setColor(AppTheme.getTextMuted());
-        g.drawString("ANALYSIS WORKFLOW", LEFT_MARGIN, 25);
+        g.drawString("PREDICTION WORKFLOW", LEFT_MARGIN, 25);
 
         // Draw connecting vertical line
         g.setColor(AppTheme.getBorder());

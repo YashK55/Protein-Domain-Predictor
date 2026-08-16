@@ -45,7 +45,7 @@ echo ProteinDomainPredictor.jar built successfully.
 :: 5. Build portable app-image via jpackage
 echo.
 echo [5/7] Generating portable application image...
-jpackage --type app-image --dest dist\app-image --name "Protein Domain Predictor" --input . --main-jar ProteinDomainPredictor.jar --main-class Main --icon Logo.ico --vendor "YashK55" --description "Graph-based structural protein domain analysis tool" --app-version "2.2.0"
+jpackage --type app-image --dest dist\app-image --name "Protein Domain Predictor" --input . --main-jar ProteinDomainPredictor.jar --main-class Main --icon Logo.ico --vendor "YashK55" --description "Graph-based structural protein domain prediction tool" --app-version "2.2.0"
 if %errorlevel% neq 0 (
     echo [ERROR] Portable app-image generation failed.
     exit /b %errorlevel%
@@ -65,7 +65,7 @@ echo Portable ZIP built successfully at dist\ProteinDomainPredictor-Portable.zip
 :: 7. Try to build Windows EXE installer
 echo.
 echo [7/7] Generating installer EXE...
-jpackage --type exe --dest dist --name "Protein Domain Predictor" --input . --main-jar ProteinDomainPredictor.jar --main-class Main --icon Logo.ico --win-menu --win-shortcut --win-dir-chooser --win-shortcut-prompt --vendor "YashK55" --description "Graph-based structural protein domain analysis tool" --app-version "2.2.0"
+jpackage --type exe --dest dist --name "Protein Domain Predictor" --input . --main-jar ProteinDomainPredictor.jar --main-class Main --icon Logo.ico --win-menu --win-shortcut --win-dir-chooser --win-shortcut-prompt --vendor "YashK55" --description "Graph-based structural protein domain prediction tool" --app-version "2.2.0"
 if %errorlevel% neq 0 (
     echo.
     echo [WARNING] jpackage EXE installer build failed. This is likely because the WiX Toolset is not installed.

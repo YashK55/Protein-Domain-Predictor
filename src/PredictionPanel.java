@@ -3,9 +3,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListener {
+public class PredictionPanel extends JPanel implements PipelinePanel.PipelineListener {
 
-    public interface AnalysisListener {
+    public interface PredictionListener {
         void onBackToHome();
     }
 
@@ -35,12 +35,12 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
     
     private int currentStep = -1;
 
-    public AnalysisPanel(JFrame parentFrame, GraphPanel graphPanel, Runnable themeSwitcher, AnalysisListener listener) {
+    public PredictionPanel(JFrame parentFrame, GraphPanel graphPanel, Runnable themeSwitcher, PredictionListener listener) {
         this.graphPanel = graphPanel;
 
         // Initialize final variables first
         canvasContainer = new JPanel(new BorderLayout());
-        logDialog = new JDialog(parentFrame, "Analysis Details / Logs", false);
+        logDialog = new JDialog(parentFrame, "Prediction Details / Logs", false);
         logTextPane = new JTextPane();
         logScroll = new JScrollPane(logTextPane);
         dialogFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
@@ -104,7 +104,7 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         metadataCol = new JPanel(new GridLayout(2, 1, 0, 2));
         metadataCol.setBackground(AppTheme.getSurface());
 
-        metadataLbl = AppTheme.createLabel("Ready. Waiting for analysis...", AppTheme.BODY_BOLD, AppTheme.TEXT);
+        metadataLbl = AppTheme.createLabel("Ready. Waiting for prediction...", AppTheme.BODY_BOLD, AppTheme.TEXT);
         metadataCol.add(metadataLbl);
 
         methodLbl = AppTheme.createLabel("Method: Contact Graph → Louvain → Line Graph → MAD → Boundary Optimization", AppTheme.SMALL, AppTheme.TEXT_MUTED);
@@ -205,7 +205,7 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         subStepContainer.removeAll();
         subStepContainer.revalidate();
         subStepContainer.repaint();
-        metadataLbl.setText("Ready. Waiting for analysis...");
+        metadataLbl.setText("Ready. Waiting for prediction...");
         logTextPane.setText("");
         currentStep = -1;
     }
@@ -250,8 +250,8 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
 
     private int mapSnapshotToStage(GraphPanel.Snapshot snapshot) {
         String title = snapshot.title.toLowerCase();
-        if (title.contains("protein graph")) return 1; // Major Stage 2 (Graph Analysis)
-        if (title.contains("louvain") || title.contains("coarse-grained")) return 1; // Major Stage 2 (Graph Analysis)
+        if (title.contains("protein graph")) return 1; // Major Stage 2 (Graph Prediction)
+        if (title.contains("louvain") || title.contains("coarse-grained")) return 1; // Major Stage 2 (Graph Prediction)
         if (title.contains("line graph") || title.contains("mad")) return 2; // Major Stage 3 (Domain Detection)
         if (title.contains("label") || title.contains("remove negative")) return 2; // Major Stage 3 (Domain Detection)
         if (title.contains("rigidity") || title.contains("final")) return 3; // Major Stage 4 (Results)

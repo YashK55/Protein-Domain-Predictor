@@ -49,7 +49,7 @@ public class ChainSelectionPanel extends JPanel {
         
         headerPanel.add(Box.createVerticalStrut(8));
         
-        subtitleLbl = AppTheme.createLabel("Choose the chain to analyze across the loaded structures.", AppTheme.SUBTITLE, AppTheme.TEXT_MUTED);
+        subtitleLbl = AppTheme.createLabel("Choose the chain to predict domains for across the loaded structures.", AppTheme.SUBTITLE, AppTheme.TEXT_MUTED);
         subtitleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
         headerPanel.add(subtitleLbl);
 
@@ -111,7 +111,7 @@ public class ChainSelectionPanel extends JPanel {
         });
         footerPanel.add(backBtn);
 
-        continueBtn = new AppTheme.RoundedButton("Continue to Analysis", true);
+        continueBtn = new AppTheme.RoundedButton("Continue to Prediction", true);
         continueBtn.setEnabled(false);
         continueBtn.addActionListener(e -> {
             if (listener != null) {

@@ -2,7 +2,7 @@ import java.awt.Color;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Analyzer {
+public class Predictor {
 
     static final class Edge {
         int u, v;
@@ -98,11 +98,11 @@ public class Analyzer {
     private final Consumer<String> logger;
     private final Consumer<GraphPanel.Snapshot> onSnapshot;
 
-    public Analyzer(Consumer<String> logger) {
+    public Predictor(Consumer<String> logger) {
         this(logger, null);
     }
 
-    public Analyzer(Consumer<String> logger, Consumer<GraphPanel.Snapshot> onSnapshot) {
+    public Predictor(Consumer<String> logger, Consumer<GraphPanel.Snapshot> onSnapshot) {
         this.logger = logger == null ? s -> {} : logger;
         this.onSnapshot = onSnapshot == null ? s -> {} : onSnapshot;
     }
@@ -168,7 +168,7 @@ public class Analyzer {
         return colors;
     }
 
-    public Result analyze(List<Structure> structures,
+    public Result predict(List<Structure> structures,
                           double cutoff,
                           double rigidityThreshold,
                           double mergingThreshold) {

@@ -24,7 +24,7 @@ public class Main {
     private AboutPanel aboutPanel;
     private ProcessingPanel processingPanel;
     private ChainSelectionPanel chainSelectionPanel;
-    private AnalysisPanel analysisPanel;
+    private PredictionPanel predictionPanel;
 
     private GraphPanel graphPanel;
 
@@ -73,7 +73,7 @@ public class Main {
                 aboutPanel.applyTheme();
                 processingPanel.applyTheme();
                 chainSelectionPanel.applyTheme();
-                analysisPanel.applyTheme();
+                predictionPanel.applyTheme();
                 mainContainer.setBackground(AppTheme.getBackground());
                 frame.repaint();
             });
@@ -82,7 +82,7 @@ public class Main {
         // 2. Initialize views
         homePanel = new HomePanel(themeSwitcher, new HomePanel.HomeListener() {
             @Override
-            public void onAnalyzeIds(String pdbIds) {
+            public void onPredictIds(String pdbIds) {
                 loadPdbIdsWorkflow(pdbIds);
             }
 
@@ -109,7 +109,7 @@ public class Main {
         chainSelectionPanel = new ChainSelectionPanel(themeSwitcher, new ChainSelectionPanel.ChainSelectionListener() {
             @Override
             public void onChainSelected(char chain) {
-                runAnalysisWorkflow(chain);
+                runPredictionWorkflow(chain);
             }
 
             @Override
@@ -118,7 +118,7 @@ public class Main {
             }
         });
 
-        analysisPanel = new AnalysisPanel(frame, graphPanel, themeSwitcher, new AnalysisPanel.AnalysisListener() {
+        predictionPanel = new PredictionPanel(frame, graphPanel, themeSwitcher, new PredictionPanel.PredictionListener() {
             @Override
             public void onBackToHome() {
                 mainLayout.show(mainContainer, "HOME");
@@ -130,7 +130,7 @@ public class Main {
         mainContainer.add(aboutPanel, "ABOUT");
         mainContainer.add(processingPanel, "PROCESSING");
         mainContainer.add(chainSelectionPanel, "CHAIN_SELECTION");
-        mainContainer.add(analysisPanel, "ANALYSIS");
+        mainContainer.add(predictionPanel, "PREDICTION");
 
         frame.add(mainContainer);
         mainLayout.show(mainContainer, "HOME");
@@ -227,7 +227,7 @@ public class Main {
 
         File[] files = chooser.getSelectedFiles();
         if (files.length < 2) {
-            JOptionPane.showMessageDialog(frame, "Select at least two PDB files.", "Multi-structure analysis", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Select at least two PDB files.", "Multi-structure prediction", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -285,22 +285,22 @@ public class Main {
         }).start();
     }
 
-    private void runAnalysisWorkflow(char selectedChain) {
-        analysisPanel.reset();
-        mainLayout.show(mainContainer, "ANALYSIS");
+    private void runPredictionWorkflow(char selectedChain) {
+        predictionPanel.reset();
+        mainLayout.show(mainContainer, "PREDICTION");
 
         new Thread(() -> {
             try {
                 // Initialize logs pane HTML formatting
-                initLogTextPane(analysisPanel.getLogTextPane());
+                initLogTextPane(predictionPanel.getLogTextPane());
 
                 // Set step statuses for 4 major stages
-                analysisPanel.setStepStatus(0, PipelinePanel.StepStatus.COMPLETED); // 01 Structure Complete
-                analysisPanel.setStepStatus(1, PipelinePanel.StepStatus.ACTIVE);    // 02 Graph Analysis Active
-                analysisPanel.setStepStatus(2, PipelinePanel.StepStatus.PENDING);
-                analysisPanel.setStepStatus(3, PipelinePanel.StepStatus.PENDING);
+                predictionPanel.setStepStatus(0, PipelinePanel.StepStatus.COMPLETED); // 01 Structure Complete
+                predictionPanel.setStepStatus(1, PipelinePanel.StepStatus.ACTIVE);    // 02 Graph Prediction Active
+                predictionPanel.setStepStatus(2, PipelinePanel.StepStatus.PENDING);
+                predictionPanel.setStepStatus(3, PipelinePanel.StepStatus.PENDING);
                 
-                analysisPanel.setMetadataText("Running Contact Graph Analysis...");
+                predictionPanel.setMetadataText("Running Contact Graph Prediction...");
 
                 List<Structure> structures = new ArrayList<>();
                 for (int i = 0; i < loadedFiles.size(); i++) {
@@ -313,9 +313,9 @@ public class Main {
                     structures.add(s);
                 }
 
-                // Run actual scientific analysis
-                Analyzer analyzer = new Analyzer(this::append, snapshot -> {
-                    analysisPanel.addSnapshot(snapshot);
+                // Run actual scientific prediction
+                Predictor predictor = new Predictor(this::append, snapshot -> {
+                    predictionPanel.addSnapshot(snapshot);
                 });
 
                 append("\n============================================\n");
@@ -328,12 +328,12 @@ public class Main {
                 append("  Rigidity threshold = 3.5 Å\n");
                 append("  Merging threshold = 1.0\n");
 
-                Analyzer.Result result = analyzer.analyze(structures, 7.5, 3.5, 1.0);
+                Predictor.Result result = predictor.predict(structures, 7.5, 3.5, 1.0);
 
                 // Complete remaining pipeline statuses
-                analysisPanel.setStepStatus(1, PipelinePanel.StepStatus.COMPLETED);
-                analysisPanel.setStepStatus(2, PipelinePanel.StepStatus.COMPLETED);
-                analysisPanel.setStepStatus(3, PipelinePanel.StepStatus.COMPLETED);
+                predictionPanel.setStepStatus(1, PipelinePanel.StepStatus.COMPLETED);
+                predictionPanel.setStepStatus(2, PipelinePanel.StepStatus.COMPLETED);
+                predictionPanel.setStepStatus(3, PipelinePanel.StepStatus.COMPLETED);
 
                 append("\n============================================\n");
                 append("FINAL RESULT\n");
@@ -359,7 +359,7 @@ public class Main {
                     append("\n");
                 }
 
-                append("\nAnalysis complete.\n");
+                append("\nPrediction complete.\n");
                 
                 int hingeCount = result.lineNodes.size() - result.domains.stream().mapToInt(List::size).sum();
                 if (hingeCount < 0) hingeCount = 0; // fallback calculation
@@ -372,20 +372,20 @@ public class Main {
 
                 String metadataText = String.format("%s  ·  Chain %c  ·  %s  ·  %s  ·  %s",
                         structStr, selectedChain, resStr, domStr, hingeStr);
-                analysisPanel.setMetadataText(metadataText);
+                predictionPanel.setMetadataText(metadataText);
 
-                // Analysis complete
+                // Prediction complete
 
             } catch (Exception ex) {
                 ex.printStackTrace();
                 append("\nERROR: " + ex.getMessage() + "\n");
-                analysisPanel.setMetadataText("Error during analysis: " + ex.getMessage());
-                analysisPanel.setStepStatus(1, PipelinePanel.StepStatus.ERROR);
-                analysisPanel.setStepStatus(2, PipelinePanel.StepStatus.ERROR);
-                analysisPanel.setStepStatus(3, PipelinePanel.StepStatus.ERROR);
+                predictionPanel.setMetadataText("Error during prediction: " + ex.getMessage());
+                predictionPanel.setStepStatus(1, PipelinePanel.StepStatus.ERROR);
+                predictionPanel.setStepStatus(2, PipelinePanel.StepStatus.ERROR);
+                predictionPanel.setStepStatus(3, PipelinePanel.StepStatus.ERROR);
                 
                 SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(frame, "Error running analysis: " + ex.getMessage(), "Analysis Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Error running prediction: " + ex.getMessage(), "Prediction Error", JOptionPane.ERROR_MESSAGE);
                 });
             }
         }).start();
@@ -393,7 +393,7 @@ public class Main {
 
 
 
-    private List<Integer> domainResidues(Analyzer.Result result, int domainIndex) {
+    private List<Integer> domainResidues(Predictor.Result result, int domainIndex) {
         List<Integer> communityGroup = result.domains.get(domainIndex);
         List<Integer> residues = new ArrayList<>();
 
@@ -522,13 +522,13 @@ public class Main {
                     html = "<hr>";
                 } else if (text.trim().equals("PROTEIN DOMAIN PREDICTOR") || text.trim().equals("FINAL RESULT")) {
                     html = "<h2>" + text.trim() + "</h2>";
-                } else if (text.startsWith("Graph-based") || text.startsWith("Analysis complete") || text.startsWith("Parameters:") || text.startsWith("  Contact") || text.startsWith("  Rigidity") || text.startsWith("  Merging")) {
+                } else if (text.startsWith("Graph-based") || text.startsWith("Prediction complete") || text.startsWith("Parameters:") || text.startsWith("  Contact") || text.startsWith("  Rigidity") || text.startsWith("  Merging")) {
                     html = "<span class='param'>" + escapeHtml(text.trim()) + "</span><br>";
                 } else {
                     html = escapeHtml(text).replace("\n", "<br>");
                 }
 
-                JTextPane logPane = analysisPanel.getLogTextPane();
+                JTextPane logPane = predictionPanel.getLogTextPane();
                 HTMLDocument doc = (HTMLDocument) logPane.getDocument();
                 HTMLEditorKit kit = (HTMLEditorKit) logPane.getEditorKit();
                 kit.insertHTML(doc, doc.getLength(), html, 0, 0, null);

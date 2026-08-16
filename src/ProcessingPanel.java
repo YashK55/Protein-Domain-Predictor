@@ -98,7 +98,7 @@ public class ProcessingPanel extends JPanel {
                 "Loading PDB structures",
                 "Reading residues",
                 "Detecting available chains",
-                "Preparing analysis"
+                "Preparing prediction"
         };
 
         for (int i = 0; i < 4; i++) {

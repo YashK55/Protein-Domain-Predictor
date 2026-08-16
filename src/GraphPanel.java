@@ -121,7 +121,7 @@ public class GraphPanel extends JPanel {
             g.setFont(AppTheme.BODY_BOLD);
             FontMetrics fm = g.getFontMetrics();
             String line1 = "No Visualization Yet";
-            String line2 = "Run the analysis to generate a structural graph.";
+            String line2 = "Run the prediction to generate a structural graph.";
             
             int w1 = fm.stringWidth(line1);
             g.drawString(line1, (width - w1) / 2, height / 2 - 12);

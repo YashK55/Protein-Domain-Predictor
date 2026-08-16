@@ -5,7 +5,7 @@ import java.io.File;
 public class HomePanel extends JPanel {
 
     public interface HomeListener {
-        void onAnalyzeIds(String pdbIds);
+        void onPredictIds(String pdbIds);
         void onOpenFiles();
         void onViewReferences();
         void onViewAbout();
@@ -20,7 +20,7 @@ public class HomePanel extends JPanel {
     private final JLabel orLbl;
     private final JPanel footer;
     
-    private final AppTheme.RoundedButton analyzeBtn;
+    private final AppTheme.RoundedButton predictBtn;
     private final AppTheme.RoundedButton loadFilesBtn;
     private final AppTheme.RoundedButton refBtn;
     private final AppTheme.RoundedButton aboutBtn;
@@ -81,12 +81,12 @@ public class HomePanel extends JPanel {
         c.insets = new Insets(2, 0, 14, 0);
 
         // 3. Subtitle
-        subtitleLbl = AppTheme.createLabel("Graph-based structural domain analysis", AppTheme.SUBTITLE, AppTheme.TEXT_MUTED);
+        subtitleLbl = AppTheme.createLabel("Graph-based structural domain prediction", AppTheme.SUBTITLE, AppTheme.TEXT_MUTED);
         centerWrapper.add(subtitleLbl, c);
 
         // 4. Description text
         c.insets = new Insets(2, 0, 20, 0);
-        descLbl = AppTheme.createLabel("Analyze protein structures and identify potential rigid structural domains.", AppTheme.BODY, AppTheme.TEXT_MUTED);
+        descLbl = AppTheme.createLabel("Predict protein structural domains and identify potential rigid domain boundaries.", AppTheme.BODY, AppTheme.TEXT_MUTED);
         centerWrapper.add(descLbl, c);
 
         // 5. Card container for Inputs
@@ -112,13 +112,13 @@ public class HomePanel extends JPanel {
         card.add(pdbInputField, cc);
 
         cc.insets = new Insets(10, 0, 6, 0);
-        analyzeBtn = new AppTheme.RoundedButton("Analyze Structures", true);
-        analyzeBtn.addActionListener(e -> {
+        predictBtn = new AppTheme.RoundedButton("Predict Domains", true);
+        predictBtn.addActionListener(e -> {
             if (listener != null) {
-                listener.onAnalyzeIds(pdbInputField.getText().trim());
+                listener.onPredictIds(pdbInputField.getText().trim());
             }
         });
-        card.add(analyzeBtn, cc);
+        card.add(predictBtn, cc);
 
         cc.insets = new Insets(6, 0, 6, 0);
         cc.fill = GridBagConstraints.NONE;
@@ -188,7 +188,7 @@ public class HomePanel extends JPanel {
         orLbl.repaint();
 
         // Repaint custom buttons/text field
-        analyzeBtn.repaint();
+        predictBtn.repaint();
         loadFilesBtn.repaint();
         refBtn.repaint();
         aboutBtn.repaint();

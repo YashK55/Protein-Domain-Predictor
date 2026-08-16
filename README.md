@@ -102,7 +102,7 @@ This generates both the portable ZIP and Setup EXE in the `dist/` directory.
 ## 🚀 Key Features
 
 *   **Dual Theme UI (Light/Dark Mode)**: Custom anti-aliased rounded widgets (`RoundedButton` and `RoundedTextField`) and responsive panels supporting seamless light and dark mode switching with high-contrast visualization canvases.
-*   **Step-wise Chain Auto-Detection**: Enter PDB IDs or select local files, and the app will scan the structures, detect all common chain identifiers, and prompt you to select specific chains before running analysis.
+*   **Step-wise Chain Auto-Detection**: Enter PDB IDs or select local files, and the app will scan the structures, detect all common chain identifiers, and prompt you to select specific chains before running prediction.
 *   **Interactive 2D Network Canvas**: Interactive circular layouts for pipeline stages. Hovering over nodes highlights edge paths and displays residue indexes, group memberships, and degree connectivity in real-time.
 *   **Vector Icons Integration**: Native vector-drawn components (`ThemeIcon`, `ArrowIcon`, `StatusIcon`) to provide seamless resolution scalability without emoji dependencies.
 *   **Algorithmic Optimization**: Louvain partitioning optimized from $O(N)$ community size scans to $O(1)$ size caching, delivering massive performance boosts.
@@ -121,8 +121,8 @@ ProteinDomainPredictor/
 ├── docs/images/                # Documentation screenshots
 ├── src/                        # Java source directory
 │   ├── AboutPanel.java         # About & Changelog panel layout (GridBagLayout)
-│   ├── AnalysisPanel.java      # Guided Analysis Panel
-│   ├── Analyzer.java           # Math core: Contact graph, Louvain, MAD, Viterbi
+│   ├── PredictionPanel.java    # Guided Prediction Panel
+│   ├── Predictor.java          # Math core: Contact graph, Louvain, MAD, Viterbi
 │   ├── AppTheme.java           # Color modes, vector icons, & custom widgets
 │   ├── ChainSelectionPanel.java# Inter-structure chain selection view
 │   ├── GraphPanel.java         # Interactive 2D circular network graph renderer
@@ -143,7 +143,7 @@ ProteinDomainPredictor/
 
 ## 🧬 Algorithm Pipeline
 
-The core analysis follows the multi-structure rigid domain pipeline:
+The core prediction follows the multi-structure rigid domain pipeline:
 
 ```mermaid
 graph TD
