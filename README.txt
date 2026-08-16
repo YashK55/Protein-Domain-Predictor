@@ -1,4 +1,4 @@
-# ProteinDomainAnalyzer
+# Protein Domain Predictor
 
 A compact Java/Swing implementation of the graph-based rigid-domain workflow described by Dang et al. (2021).
 

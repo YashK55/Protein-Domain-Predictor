@@ -579,6 +579,9 @@ public class Analyzer {
         int[] community = new int[n];
         for (int i = 0; i < n; i++) community[i] = i;
 
+        int[] communitySizes = new int[n];
+        Arrays.fill(communitySizes, 1);
+
         boolean moved = true;
         int rounds = 0;
 
@@ -598,13 +601,13 @@ public class Analyzer {
                 double bestGain = 0.0;
 
                 double currentGain = communityScore(
-                        node, current, community, adjacency, resolution);
+                        node, current, community, communitySizes, adjacency, resolution);
 
                 for (int candidate : candidates) {
                     if (candidate == current) continue;
 
                     double gain = communityScore(
-                            node, candidate, community, adjacency, resolution)
+                            node, candidate, community, communitySizes, adjacency, resolution)
                             - currentGain;
 
                     if (gain > bestGain + 1e-12) {
@@ -615,6 +618,8 @@ public class Analyzer {
 
                 if (bestCommunity != current) {
                     community[node] = bestCommunity;
+                    communitySizes[current]--;
+                    communitySizes[bestCommunity]++;
                     moved = true;
                 }
             }
@@ -632,15 +637,12 @@ public class Analyzer {
             int node,
             int communityId,
             int[] community,
+            int[] communitySizes,
             List<Map<Integer, Double>> adjacency,
             double resolution) {
 
         double connection = 0.0;
-        int size = 0;
-
-        for (int i = 0; i < community.length; i++) {
-            if (community[i] == communityId) size++;
-        }
+        int size = communitySizes[communityId];
 
         for (Map.Entry<Integer, Double> e : adjacency.get(node).entrySet()) {
             if (community[e.getKey()] == communityId) {
