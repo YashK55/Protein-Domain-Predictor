@@ -38,12 +38,20 @@ jobs:
       - name: Package JAR
         run: jar --create --file ProteinDomainPredictor.jar --main-class Main -C bin .
 
+      - name: Prepare staging directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path staging -Force
+          Copy-Item ProteinDomainPredictor.jar staging\
+          Copy-Item Logo.png staging\
+          if (Test-Path data) { Copy-Item -Recurse data staging\data }
+
       - name: Build portable app-image
         run: >
           jpackage --type app-image
           --dest dist\app-image
           --name "Protein Domain Predictor"
-          --input .
+          --input staging
           --main-jar ProteinDomainPredictor.jar
           --main-class Main
           --icon Logo.ico
@@ -63,7 +71,7 @@ jobs:
           jpackage --type exe
           --dest dist
           --name "Protein Domain Predictor"
-          --input .
+          --input staging
           --main-jar ProteinDomainPredictor.jar
           --main-class Main
           --icon Logo.ico
