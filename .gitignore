@@ -2,7 +2,6 @@
 *.jar
 /dist/
 /bin/
-Logo.ico
 ProteinDomainPredictor-Setup.exe
 
 # `.\package.bat` To run Code in windows
