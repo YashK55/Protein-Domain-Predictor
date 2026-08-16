@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 
 public final class AppTheme {
 
@@ -9,7 +11,7 @@ public final class AppTheme {
         DARK, LIGHT
     }
 
-    private static ThemeMode currentMode = ThemeMode.DARK;
+    private static ThemeMode currentMode = ThemeMode.LIGHT; // Default to Light Mode
 
     public static ThemeMode getThemeMode() {
         return currentMode;
@@ -107,14 +109,98 @@ public final class AppTheme {
         scrollPane.getHorizontalScrollBar().setBackground(getBackground());
     }
 
+    // Vector Theme Icon Class (No Emojis!)
+    public static class ThemeIcon implements Icon {
+        private final boolean dark;
+
+        public ThemeIcon(boolean dark) {
+            this.dark = dark;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int cx = x + 8;
+            int cy = y + 8;
+
+            if (dark) {
+                // Crescent Moon shape subtraction
+                g2.setColor(new Color(251, 191, 36));
+                Area moon = new Area(new Ellipse2D.Double(cx - 6, cy - 6, 12, 12));
+                moon.subtract(new Area(new Ellipse2D.Double(cx - 3, cy - 8, 12, 12)));
+                g2.fill(moon);
+            } else {
+                // Sun
+                g2.setColor(new Color(245, 158, 11));
+                g2.fillOval(cx - 3, cy - 3, 6, 6);
+                g2.setStroke(new BasicStroke(1.5f));
+                for (int i = 0; i < 8; i++) {
+                    double angle = i * Math.PI / 4;
+                    int x1 = cx + (int) (4 * Math.cos(angle));
+                    int y1 = cy + (int) (4 * Math.sin(angle));
+                    int x2 = cx + (int) (6 * Math.cos(angle));
+                    int y2 = cy + (int) (6 * Math.sin(angle));
+                    g2.drawLine(x1, y1, x2, y2);
+                }
+            }
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() { return 16; }
+        @Override
+        public int getIconHeight() { return 16; }
+    }
+
+    // Vector Arrow Icon (No Unicode Arrow characters!)
+    public static class ArrowIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(c.getForeground());
+            g2.setStroke(new BasicStroke(1.8f));
+            int cx = x + 8;
+            int cy = y + 8;
+            g2.drawLine(cx + 4, cy, cx - 4, cy);
+            g2.drawLine(cx - 4, cy, cx - 1, cy - 3);
+            g2.drawLine(cx - 4, cy, cx - 1, cy + 3);
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() { return 16; }
+        @Override
+        public int getIconHeight() { return 16; }
+    }
+
     public static JToggleButton createThemeToggle(Runnable onToggle) {
         JToggleButton toggle = new JToggleButton() {
+            private boolean hovered = false;
+            {
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        hovered = true;
+                        repaint();
+                    }
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        hovered = false;
+                        repaint();
+                    }
+                });
+            }
+
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 boolean isDark = AppTheme.getThemeMode() == ThemeMode.DARK;
-                g2.setColor(isDark ? new Color(30, 41, 67) : new Color(226, 232, 240));
+                g2.setColor(hovered 
+                    ? (isDark ? new Color(45, 55, 72) : new Color(209, 213, 219)) 
+                    : (isDark ? new Color(30, 41, 67) : new Color(226, 232, 240)));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
                 g2.setColor(AppTheme.getBorder());
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
@@ -130,7 +216,8 @@ public final class AppTheme {
 
         Runnable updateText = () -> {
             boolean isDark = AppTheme.getThemeMode() == ThemeMode.DARK;
-            toggle.setText(isDark ? "☀ Light" : "☾ Dark");
+            toggle.setText(isDark ? " Light" : " Dark");
+            toggle.setIcon(new ThemeIcon(!isDark)); // Moon icon in light mode, Sun icon in dark mode
             toggle.setForeground(AppTheme.getText());
         };
 
@@ -144,6 +231,15 @@ public final class AppTheme {
         });
 
         return toggle;
+    }
+
+    public static void updateThemeToggle(JToggleButton toggle) {
+        if (toggle == null) return;
+        boolean isDark = AppTheme.getThemeMode() == ThemeMode.DARK;
+        toggle.setText(isDark ? " Light" : " Dark");
+        toggle.setIcon(new ThemeIcon(!isDark));
+        toggle.setForeground(AppTheme.getText());
+        toggle.repaint();
     }
 
     // Custom rounded text field
@@ -258,7 +354,11 @@ public final class AppTheme {
                     g2.setColor(new Color(255, 255, 255, 40));
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
                 } else {
-                    g2.setColor(hovered ? getSurfaceLight() : getSurface());
+                    boolean isLight = currentMode == ThemeMode.LIGHT;
+                    Color bg = hovered 
+                        ? (isLight ? new Color(226, 232, 240) : getSurfaceLight()) 
+                        : getSurface();
+                    g2.setColor(bg);
                     g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                     g2.setColor(hovered ? getAccent() : AppTheme.getBorder());
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);

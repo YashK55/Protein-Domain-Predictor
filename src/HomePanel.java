@@ -51,7 +51,7 @@ public class HomePanel extends JPanel {
 
         // 1. Logo
         JLabel logoLabel = new JLabel();
-        File logoFile = new File("logo.jpg");
+        File logoFile = new File("Logo.png");
         if (logoFile.exists()) {
             try {
                 ImageIcon origIcon = new ImageIcon(logoFile.getAbsolutePath());
@@ -189,10 +189,7 @@ public class HomePanel extends JPanel {
         pdbInputField.repaint();
 
         // Update theme toggle label
-        boolean isDark = AppTheme.getThemeMode() == AppTheme.ThemeMode.DARK;
-        themeToggle.setText(isDark ? "☀ Light" : "☾ Dark");
-        themeToggle.setForeground(AppTheme.getText());
-        themeToggle.repaint();
+        AppTheme.updateThemeToggle(themeToggle);
 
         revalidate();
         repaint();

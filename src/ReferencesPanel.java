@@ -22,24 +22,41 @@ public class ReferencesPanel extends JPanel {
         setLayout(new BorderLayout(0, 12));
         setBorder(BorderFactory.createEmptyBorder(20, 24, 20, 24));
 
-        // Header Panel
-        headerPanel = new JPanel(new BorderLayout());
+        // Header Panel using GridBagLayout to prevent overlaps
+        headerPanel = new JPanel(new GridBagLayout());
         headerPanel.setBackground(AppTheme.getBackground());
 
-        backBtn = new AppTheme.RoundedButton("← Back to Home", false);
+        backBtn = new AppTheme.RoundedButton(" Back to Home", false);
+        backBtn.setIcon(new AppTheme.ArrowIcon());
         backBtn.setFont(AppTheme.SMALL_BOLD);
         backBtn.addActionListener(e -> {
             if (listener != null) listener.onBack();
         });
-        headerPanel.add(backBtn, BorderLayout.WEST);
 
         titleLbl = AppTheme.createLabel("References & Methodology", AppTheme.TITLE, AppTheme.TEXT);
         titleLbl.setHorizontalAlignment(SwingConstants.CENTER);
-        headerPanel.add(titleLbl, BorderLayout.CENTER);
 
-        // Theme Toggle on Right of Header
         themeToggle = AppTheme.createThemeToggle(themeSwitcher);
-        headerPanel.add(themeToggle, BorderLayout.EAST);
+
+        GridBagConstraints hc = new GridBagConstraints();
+        hc.gridy = 0;
+        
+        hc.gridx = 0;
+        hc.weightx = 0.0;
+        hc.anchor = GridBagConstraints.WEST;
+        headerPanel.add(backBtn, hc);
+
+        hc.gridx = 1;
+        hc.weightx = 1.0;
+        hc.anchor = GridBagConstraints.CENTER;
+        hc.fill = GridBagConstraints.HORIZONTAL;
+        headerPanel.add(titleLbl, hc);
+
+        hc.gridx = 2;
+        hc.weightx = 0.0;
+        hc.anchor = GridBagConstraints.EAST;
+        hc.fill = GridBagConstraints.NONE;
+        headerPanel.add(themeToggle, hc);
 
         add(headerPanel, BorderLayout.NORTH);
 
@@ -64,10 +81,7 @@ public class ReferencesPanel extends JPanel {
         AppTheme.styleScrollPane(scrollPane);
 
         // Update theme toggle label
-        boolean isDark = AppTheme.getThemeMode() == AppTheme.ThemeMode.DARK;
-        themeToggle.setText(isDark ? "☀ Light" : "☾ Dark");
-        themeToggle.setForeground(AppTheme.getText());
-        themeToggle.repaint();
+        AppTheme.updateThemeToggle(themeToggle);
 
         // Reload content with new CSS colors
         loadContent();

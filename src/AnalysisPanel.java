@@ -7,14 +7,11 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
 
     public interface AnalysisListener {
         void onBackToHome();
-        void onToggle3D(boolean show3D);
     }
 
     private final PipelinePanel pipelinePanel;
     private final GraphPanel graphPanel;
-    private final Structure3DPanel structure3DPanel;
     
-    private final CardLayout canvasLayout;
     private final JPanel canvasContainer;
     private final JPanel subStepContainer;
     
@@ -27,41 +24,29 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
     private final JPanel dialogFooter;
     private final AppTheme.RoundedButton closeDialogBtn;
     
-    private final AppTheme.RoundedButton showSuperpositionBtn;
-    private final AppTheme.RoundedButton showGraphBtn;
-    
-    private final AppTheme.RoundedButton fitBtn;
-    private final AppTheme.RoundedButton resetBtn;
     private final JToggleButton themeToggle;
     
     private final List<GraphPanel.Snapshot> snapshots = new ArrayList<>();
     private final AnalysisListener listener;
-    private final JPanel legendContainer;
     
     private final JPanel bottomPanel;
     private final JPanel metadataCol;
     private final JPanel actionsPanel;
     private final JPanel vizToolbar;
-    private final JPanel switchPanel;
-    private final JPanel controlsPanel;
     
     private int currentStep = -1;
 
-    public AnalysisPanel(JFrame parentFrame, GraphPanel graphPanel, Structure3DPanel structure3DPanel, Runnable themeSwitcher, AnalysisListener listener) {
+    public AnalysisPanel(JFrame parentFrame, GraphPanel graphPanel, Runnable themeSwitcher, AnalysisListener listener) {
         this.graphPanel = graphPanel;
-        this.structure3DPanel = structure3DPanel;
         this.listener = listener;
 
         // Initialize final variables first
-        canvasLayout = new CardLayout();
-        canvasContainer = new JPanel(canvasLayout);
+        canvasContainer = new JPanel(new BorderLayout());
         logDialog = new JDialog(parentFrame, "Analysis Details / Logs", false);
         logTextPane = new JTextPane();
         logScroll = new JScrollPane(logTextPane);
         dialogFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
         closeDialogBtn = new AppTheme.RoundedButton("Close", true);
-        fitBtn = new AppTheme.RoundedButton("Fit", false);
-        resetBtn = new AppTheme.RoundedButton("Reset", false);
 
         setBackground(AppTheme.getBackground());
         setLayout(new BorderLayout(12, 12));
@@ -87,88 +72,27 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
                 BorderFactory.createEmptyBorder(6, 12, 6, 12)
         ));
 
-        // Segmented Switch: Graph vs 3D
-        switchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        switchPanel.setBackground(AppTheme.getSurface());
-        
-        showGraphBtn = new AppTheme.RoundedButton("Graph Canvas", true);
-        showSuperpositionBtn = new AppTheme.RoundedButton("3D Structure", false);
-        showSuperpositionBtn.setEnabled(false); // only enabled once analysis finishes
-
-        showGraphBtn.addActionListener(e -> {
-            showGraphBtn.setSelected(true);
-            showSuperpositionBtn.setSelected(false);
-            showGraphBtn.setForeground(AppTheme.getText());
-            showSuperpositionBtn.setForeground(AppTheme.getTextMuted());
-            canvasLayout.show(canvasContainer, "GRAPH");
-            fitBtn.setVisible(false);
-            resetBtn.setVisible(false);
-            if (listener != null) listener.onToggle3D(false);
-        });
-
-        showSuperpositionBtn.addActionListener(e -> {
-            showSuperpositionBtn.setSelected(true);
-            showGraphBtn.setSelected(false);
-            showSuperpositionBtn.setForeground(AppTheme.getText());
-            showGraphBtn.setForeground(AppTheme.getTextMuted());
-            canvasLayout.show(canvasContainer, "3D");
-            fitBtn.setVisible(true);
-            resetBtn.setVisible(true);
-            if (listener != null) listener.onToggle3D(true);
-        });
-
-        switchPanel.add(showGraphBtn);
-        switchPanel.add(showSuperpositionBtn);
-        vizToolbar.add(switchPanel, BorderLayout.WEST);
+        // Title/Label on Left of Toolbar
+        JLabel titleLabel = AppTheme.createLabel("Graph Canvas", AppTheme.BODY_BOLD, AppTheme.TEXT);
+        vizToolbar.add(titleLabel, BorderLayout.WEST);
 
         // Dynamic Sub-step container (Middle)
         subStepContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
         subStepContainer.setBackground(AppTheme.getSurface());
         vizToolbar.add(subStepContainer, BorderLayout.CENTER);
 
-        // Action controls: Fit & Reset & Theme (Right)
-        controlsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        controlsPanel.setBackground(AppTheme.getSurface());
-        
-        fitBtn.setFont(AppTheme.SMALL_BOLD);
-        fitBtn.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
-        fitBtn.addActionListener(e -> structure3DPanel.resetCamera());
-        fitBtn.setVisible(false); // Hidden by default (since Graph Canvas is active)
-
-        resetBtn.setFont(AppTheme.SMALL_BOLD);
-        resetBtn.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
-        resetBtn.addActionListener(e -> structure3DPanel.resetCamera());
-        resetBtn.setVisible(false); // Hidden by default
-
+        // Theme Toggle on Right
         themeToggle = AppTheme.createThemeToggle(themeSwitcher);
-        
-        controlsPanel.add(fitBtn);
-        controlsPanel.add(resetBtn);
-        controlsPanel.add(themeToggle);
-        vizToolbar.add(controlsPanel, BorderLayout.EAST);
+        vizToolbar.add(themeToggle, BorderLayout.EAST);
 
         centerPanel.add(vizToolbar, BorderLayout.NORTH);
 
-        // Canvas container (Holds GraphPanel and Structure3DPanel)
+        // Canvas container (Holds GraphPanel)
         canvasContainer.setBackground(AppTheme.getCanvasBackground());
         canvasContainer.setBorder(BorderFactory.createLineBorder(AppTheme.getBorder(), 1));
+        canvasContainer.add(graphPanel, BorderLayout.CENTER);
         
-        canvasContainer.add(graphPanel, "GRAPH");
-        
-        // 3D Wrapper Panel containing 3D panel and its Legend
-        JPanel structure3DWrapper = new JPanel(new BorderLayout());
-        structure3DWrapper.setBackground(AppTheme.getCanvasBackground());
-        structure3DWrapper.add(structure3DPanel, BorderLayout.CENTER);
-        
-        legendContainer = new JPanel(new BorderLayout());
-        legendContainer.setPreferredSize(new Dimension(200, 0));
-        legendContainer.setBackground(AppTheme.getBackground());
-        legendContainer.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, AppTheme.getBorder()));
-        structure3DWrapper.add(legendContainer, BorderLayout.EAST);
-        
-        canvasContainer.add(structure3DWrapper, "3D");
         centerPanel.add(canvasContainer, BorderLayout.CENTER);
-
         add(centerPanel, BorderLayout.CENTER);
 
         // 3. Bottom Panel (Metadata, Methods, Action Buttons)
@@ -193,7 +117,8 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         actionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionsPanel.setBackground(AppTheme.getSurface());
 
-        AppTheme.RoundedButton backBtn = new AppTheme.RoundedButton("← Back to Home", false);
+        AppTheme.RoundedButton backBtn = new AppTheme.RoundedButton(" Back to Home", false);
+        backBtn.setIcon(new AppTheme.ArrowIcon());
         backBtn.setFont(AppTheme.SMALL_BOLD);
         backBtn.addActionListener(e -> {
             if (listener != null) listener.onBackToHome();
@@ -238,9 +163,7 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
                 BorderFactory.createLineBorder(AppTheme.getBorder(), 1),
                 BorderFactory.createEmptyBorder(6, 12, 6, 12)
         ));
-        switchPanel.setBackground(AppTheme.getSurface());
         subStepContainer.setBackground(AppTheme.getSurface());
-        controlsPanel.setBackground(AppTheme.getSurface());
 
         pipelinePanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(AppTheme.getBorder(), 1),
@@ -249,9 +172,6 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
 
         canvasContainer.setBackground(AppTheme.getCanvasBackground());
         canvasContainer.setBorder(BorderFactory.createLineBorder(AppTheme.getBorder(), 1));
-
-        legendContainer.setBackground(AppTheme.getBackground());
-        legendContainer.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, AppTheme.getBorder()));
 
         bottomPanel.setBackground(AppTheme.getSurface());
         bottomPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -269,16 +189,12 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         // Repaint all
         pipelinePanel.repaint();
         graphPanel.repaint();
-        structure3DPanel.repaint();
         
         // Refresh toggles
         updateToggleButtonsForeground();
         
-        // Update theme toggle selection label
-        boolean isDark = AppTheme.getThemeMode() == AppTheme.ThemeMode.DARK;
-        themeToggle.setText(isDark ? "☀ Light" : "☾ Dark");
-        themeToggle.setForeground(AppTheme.getText());
-        themeToggle.repaint();
+        // Update theme toggle label
+        AppTheme.updateThemeToggle(themeToggle);
 
         revalidate();
         repaint();
@@ -288,20 +204,9 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         snapshots.clear();
         pipelinePanel.reset();
         graphPanel.show(null);
-        showSuperpositionBtn.setEnabled(false);
-        showGraphBtn.setSelected(true);
-        showSuperpositionBtn.setSelected(false);
-        showGraphBtn.setForeground(AppTheme.getText());
-        showSuperpositionBtn.setForeground(AppTheme.getTextMuted());
-        canvasLayout.show(canvasContainer, "GRAPH");
-        fitBtn.setVisible(false);
-        resetBtn.setVisible(false);
         subStepContainer.removeAll();
         subStepContainer.revalidate();
         subStepContainer.repaint();
-        legendContainer.removeAll();
-        legendContainer.revalidate();
-        legendContainer.repaint();
         metadataLbl.setText("Ready. Waiting for analysis...");
         logTextPane.setText("");
         currentStep = -1;
@@ -336,16 +241,8 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
         SwingUtilities.invokeLater(() -> metadataLbl.setText(text));
     }
 
-    public void enable3DView(boolean enable) {
-        SwingUtilities.invokeLater(() -> showSuperpositionBtn.setEnabled(enable));
-    }
-
     public JTextPane getLogTextPane() {
         return logTextPane;
-    }
-
-    public JPanel getLegendContainer() {
-        return legendContainer;
     }
 
     @Override
@@ -429,6 +326,22 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
                 final GraphPanel.Snapshot snap = findSnapshotForStageAndSubStep(stageIndex, subIdx);
                 
                 JToggleButton btn = new JToggleButton(titles[i]) {
+                    private boolean hovered = false;
+                    {
+                        addMouseListener(new java.awt.event.MouseAdapter() {
+                            @Override
+                            public void mouseEntered(java.awt.event.MouseEvent e) {
+                                hovered = true;
+                                repaint();
+                            }
+                            @Override
+                            public void mouseExited(java.awt.event.MouseEvent e) {
+                                hovered = false;
+                                repaint();
+                            }
+                        });
+                    }
+
                     @Override
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
@@ -438,7 +351,10 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
                         } else if (isSelected()) {
                             g2.setColor(AppTheme.getAccent());
                         } else {
-                            g2.setColor(AppTheme.getSurfaceLight());
+                            boolean isLight = AppTheme.getThemeMode() == AppTheme.ThemeMode.LIGHT;
+                            g2.setColor(hovered 
+                                ? (isLight ? new Color(226, 232, 240) : AppTheme.getSurfaceLight()) 
+                                : AppTheme.getSurface());
                         }
                         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                         g2.setColor(AppTheme.getBorder());

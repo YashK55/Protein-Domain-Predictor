@@ -27,7 +27,6 @@ public class Main {
     private AnalysisPanel analysisPanel;
 
     private GraphPanel graphPanel;
-    private Structure3DPanel structure3DPanel;
 
     // Loaded structures and results cache
     private List<File> loadedFiles;
@@ -37,18 +36,6 @@ public class Main {
 
     private volatile Analyzer.Result lastResult;
     private volatile List<Structure> lastStructures;
-    private volatile Color[] domainColors;
-    private volatile List<DomainSummary> domainSummaries;
-
-    private static final class DomainSummary {
-        final Color color;
-        final String label;
-
-        DomainSummary(Color color, String label) {
-            this.color = color;
-            this.label = label;
-        }
-    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().createWindow());
@@ -61,7 +48,7 @@ public class Main {
         frame.setLocationRelativeTo(null);
 
         // Load window icon from root directory logo.jpg if it exists
-        File iconFile = new File("logo.jpg");
+        File iconFile = new File("Logo.png");
         if (iconFile.exists()) {
             try {
                 Image icon = Toolkit.getDefaultToolkit().getImage(iconFile.getAbsolutePath());
@@ -76,7 +63,6 @@ public class Main {
         mainContainer.setBackground(AppTheme.getBackground());
 
         graphPanel = new GraphPanel();
-        structure3DPanel = new Structure3DPanel();
 
         // 1. Theme Switcher Callback
         Runnable themeSwitcher = () -> {
@@ -131,15 +117,10 @@ public class Main {
             }
         });
 
-        analysisPanel = new AnalysisPanel(frame, graphPanel, structure3DPanel, themeSwitcher, new AnalysisPanel.AnalysisListener() {
+        analysisPanel = new AnalysisPanel(frame, graphPanel, themeSwitcher, new AnalysisPanel.AnalysisListener() {
             @Override
             public void onBackToHome() {
                 mainLayout.show(mainContainer, "HOME");
-            }
-
-            @Override
-            public void onToggle3D(boolean show3D) {
-                // Pre-populated data does not need toggled loading
             }
         });
 
@@ -364,15 +345,11 @@ public class Main {
                 append("FINAL RESULT\n");
                 append("============================================\n");
 
-                List<DomainSummary> summaries = new ArrayList<>();
-                Color[] colors = new Color[result.alignedResidues.get(0).size()];
-
                 for (int d = 0; d < result.domains.size(); d++) {
                     List<Integer> residues = domainResidues(result, d);
                     if (residues.isEmpty()) continue;
 
                     Color color = GraphPanel.paletteColor(d);
-                    for (int index : residues) colors[index] = color;
 
                     String hexColor = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
                     append("\n<span style='color: " + hexColor + "; font-weight: bold;'>DOMAIN " + (d + 1) + "</span>\n");
@@ -389,11 +366,7 @@ public class Main {
 
                     Residue first = result.alignedResidues.get(0).get(residues.get(0));
                     Residue last = result.alignedResidues.get(0).get(residues.get(residues.size() - 1));
-                    summaries.add(new DomainSummary(color, "Domain " + (d + 1) + ": residues " + first.number + "-" + last.number + " (" + residues.size() + " aa)"));
                 }
-
-                domainColors = colors;
-                domainSummaries = summaries;
 
                 append("\nAnalysis complete.\n");
                 
@@ -410,9 +383,7 @@ public class Main {
                         structStr, selectedChain, resStr, domStr, hingeStr);
                 analysisPanel.setMetadataText(metadataText);
 
-                // Populate 3D structures and enable toggle
-                updateSuperimpositionData();
-                analysisPanel.enable3DView(true);
+                // Analysis complete
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -429,91 +400,7 @@ public class Main {
         }).start();
     }
 
-    private void updateSuperimpositionData() {
-        Analyzer.Result result = lastResult;
-        List<Structure> structures = lastStructures;
-        if (result == null || structures == null) return;
 
-        List<List<Residue>> aligned = result.alignedResidues;
-        List<Residue> reference = aligned.get(0);
-
-        List<Structure3DPanel.Trace> traces = new ArrayList<>();
-
-        for (int k = 0; k < aligned.size(); k++) {
-            List<Residue> mobile = aligned.get(k);
-            Superposition.Transform transform = (k == 0) ? null : Superposition.fit(mobile, reference);
-
-            List<double[]> points = new ArrayList<>();
-            for (Residue r : mobile) {
-                points.add(transform == null
-                        ? new double[]{r.x, r.y, r.z}
-                        : transform.apply(r.x, r.y, r.z));
-            }
-
-            traces.add(new Structure3DPanel.Trace(structures.get(k).pdbId + "_" + structures.get(k).chain, points));
-        }
-
-        structure3DPanel.setData(traces, domainColors);
-
-        JPanel legend = buildLegendPanel(structures);
-        analysisPanel.getLegendContainer().removeAll();
-        analysisPanel.getLegendContainer().add(legend, BorderLayout.CENTER);
-        analysisPanel.getLegendContainer().revalidate();
-        analysisPanel.getLegendContainer().repaint();
-    }
-
-    private JPanel buildLegendPanel(List<Structure> structures) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setPreferredSize(new Dimension(200, 0));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.setBackground(AppTheme.getBackground());
-
-        JLabel titleLbl = AppTheme.createLabel("Structures Overlaid:", AppTheme.SMALL_BOLD, AppTheme.TEXT);
-        panel.add(titleLbl);
-        panel.add(Box.createVerticalStrut(4));
-
-        for (Structure s : structures) {
-            JLabel nameLbl = AppTheme.createLabel("  " + s.pdbId + " (Chain " + s.chain + ")", AppTheme.SMALL, AppTheme.TEXT_MUTED);
-            panel.add(nameLbl);
-        }
-
-        panel.add(Box.createVerticalStrut(16));
-
-        JLabel domainTitleLbl = AppTheme.createLabel("Domains Detected:", AppTheme.SMALL_BOLD, AppTheme.TEXT);
-        panel.add(domainTitleLbl);
-        panel.add(Box.createVerticalStrut(6));
-
-        List<DomainSummary> summaries = domainSummaries;
-        if (summaries != null) {
-            for (DomainSummary ds : summaries) {
-                JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-                row.setBackground(AppTheme.getBackground());
-
-                JLabel swatch = new JLabel() {
-                    @Override
-                    protected void paintComponent(Graphics g) {
-                        super.paintComponent(g);
-                        Graphics2D g2 = (Graphics2D) g.create();
-                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                        g2.setColor(ds.color);
-                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 4, 4);
-                        g2.dispose();
-                    }
-                };
-                swatch.setPreferredSize(new Dimension(14, 14));
-                row.add(swatch);
-
-                JLabel swatchLabel = AppTheme.createLabel(ds.label, AppTheme.SMALL, AppTheme.TEXT_MUTED);
-                row.add(swatchLabel);
-                
-                panel.add(row);
-            }
-        }
-
-        panel.add(Box.createVerticalGlue());
-        return panel;
-    }
 
     private List<Integer> domainResidues(Analyzer.Result result, int domainIndex) {
         List<Integer> communityGroup = result.domains.get(domainIndex);

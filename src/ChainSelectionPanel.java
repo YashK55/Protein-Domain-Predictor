@@ -104,7 +104,8 @@ public class ChainSelectionPanel extends JPanel {
         footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         footerPanel.setBackground(AppTheme.getBackground());
 
-        backBtn = new AppTheme.RoundedButton("← Back", false);
+        backBtn = new AppTheme.RoundedButton(" Back", false);
+        backBtn.setIcon(new AppTheme.ArrowIcon());
         backBtn.addActionListener(e -> {
             if (listener != null) listener.onBack();
         });
@@ -160,10 +161,7 @@ public class ChainSelectionPanel extends JPanel {
         }
 
         // Update theme toggle label
-        boolean isDark = AppTheme.getThemeMode() == AppTheme.ThemeMode.DARK;
-        themeToggle.setText(isDark ? "☀ Light" : "☾ Dark");
-        themeToggle.setForeground(AppTheme.getText());
-        themeToggle.repaint();
+        AppTheme.updateThemeToggle(themeToggle);
 
         revalidate();
         repaint();
