@@ -6,11 +6,11 @@ The tool identifies rigid structural domains and hinge boundaries by modeling pr
 
 ---
 
-## 💾 Download Standalone Installer
+## 💾 Download
 
-You can download the compiled Windows installer directly from the repository root:
+Download the latest Windows installer or portable ZIP from the **Releases** page:
 
-[![Download Setup EXE](https://img.shields.io/badge/Download-Windows%20Installer-blue?style=for-the-badge&logo=windows&logoColor=white)](ProteinDomainPredictor-Setup.exe)
+[![Download Latest Release](https://img.shields.io/github/v/release/YashK55/Protein-Domain-Predictor?style=for-the-badge&logo=github&label=Download%20Latest)](https://github.com/YashK55/Protein-Domain-Predictor/releases/latest)
 
 ---
 
@@ -29,6 +29,9 @@ You can download the compiled Windows installer directly from the repository roo
 
 ```
 ProteinDomainPredictor/
+├── .github/workflows/          # CI/CD pipeline definitions
+│   ├── ci.yml                  # Build & compile on every push/PR
+│   └── release.yml             # Automated releases on version tags
 ├── data/                       # Local PDB cache directory
 ├── src/                        # Java source directory
 │   ├── AboutPanel.java         # About & Changelog panel layout (GridBagLayout)
@@ -45,7 +48,7 @@ ProteinDomainPredictor/
 │   └── Structure.java          # Download manager and standard PDB coordinate parser
 ├── Logo.ico                    # Windows installer icon
 ├── Logo.png                    # High-quality app logo
-├── ProteinDomainPredictor-Setup.exe # Standalone Windows installer executable
+├── package.bat                 # Windows packaging script
 ├── README.md                   # Core project documentation
 └── walkthrough.md              # Detailed final changes walkthrough
 ```
