@@ -6,11 +6,96 @@ The tool identifies rigid structural domains and hinge boundaries by modeling pr
 
 ---
 
-## 💾 Download
-
-Download the latest Windows installer or portable ZIP from the **Releases** page:
+## 💾 Installation
 
 [![Download Latest Release](https://img.shields.io/github/v/release/YashK55/Protein-Domain-Predictor?style=for-the-badge&logo=github&label=Download%20Latest)](https://github.com/YashK55/Protein-Domain-Predictor/releases/latest)
+
+### Option A: Windows Installer (Recommended)
+
+**Step 1** — Go to the [**Releases**](https://github.com/YashK55/Protein-Domain-Predictor/releases/latest) page and download `ProteinDomainPredictor-Setup.exe`.
+
+<p align="center">
+  <img src="docs/images/github-release.png" alt="GitHub Releases page showing downloadable assets" width="700"/>
+</p>
+
+**Step 2** — Run the downloaded `ProteinDomainPredictor-Setup.exe`.
+
+> **⚠️ Windows SmartScreen Warning**
+>
+> Since the app is not code-signed, Windows may show a SmartScreen warning:
+>
+> 1. Click **"More info"** on the warning dialog
+> 2. Click **"Run anyway"**
+>
+> This is expected for open-source software without a paid code-signing certificate.
+
+**Step 3** — Follow the installer wizard:
+   - Choose your installation directory (default: `C:\Program Files\Protein Domain Predictor\`)
+   - Select whether to create a Start Menu shortcut and Desktop shortcut
+   - Click **Install** and wait for the process to complete
+
+**Step 4** — Launch **Protein Domain Predictor** from the Start Menu or Desktop shortcut.
+
+---
+
+### Option B: Portable Version (No Installation Required)
+
+1. Download `ProteinDomainPredictor-Portable.zip` from [**Releases**](https://github.com/YashK55/Protein-Domain-Predictor/releases/latest)
+2. Extract the ZIP to any folder
+3. Open the extracted folder and run `Protein Domain Predictor.exe`
+
+> **💡 Tip:** The portable version requires no installation and can run from a USB drive. No admin privileges needed.
+
+---
+
+### Option C: Verify Downloads (Optional)
+
+Each release includes a `SHA256SUMS.txt` file for verifying download integrity:
+
+```powershell
+# PowerShell - verify the installer
+(Get-FileHash ProteinDomainPredictor-Setup.exe -Algorithm SHA256).Hash
+# Compare the output with the hash in SHA256SUMS.txt
+```
+
+---
+
+### System Requirements
+
+| Requirement | Minimum |
+|------------|---------|
+| **OS** | Windows 10 or later (64-bit) |
+| **RAM** | 4 GB |
+| **Disk** | ~200 MB (installed) |
+| **Java** | Not required — bundled with the app via `jpackage` |
+
+---
+
+## 🛠️ Building from Source
+
+For developers who want to compile and run from source code. Requires [JDK 17+](https://adoptium.net/).
+
+### Standard Command Line
+
+1. Open your terminal or PowerShell inside the `ProteinDomainPredictor` directory.
+2. Compile the files:
+   ```bash
+   javac -d bin src/*.java
+   ```
+3. Run the application:
+   ```bash
+   java -cp bin Main
+   ```
+
+### Running in Eclipse
+1. Import the directory into Eclipse as a **Java Project**.
+2. Right-click `src/Main.java` and select **Run As** > **Java Application**.
+
+### Building the Installer Locally
+```bash
+.\package.bat
+```
+This generates both the portable ZIP and Setup EXE in the `dist/` directory.
 
 ---
 
@@ -33,6 +118,7 @@ ProteinDomainPredictor/
 │   ├── ci.yml                  # Build & compile on every push/PR
 │   └── release.yml             # Automated releases on version tags
 ├── data/                       # Local PDB cache directory
+├── docs/images/                # Documentation screenshots
 ├── src/                        # Java source directory
 │   ├── AboutPanel.java         # About & Changelog panel layout (GridBagLayout)
 │   ├── AnalysisPanel.java      # Guided Analysis Panel
@@ -52,28 +138,6 @@ ProteinDomainPredictor/
 ├── README.md                   # Core project documentation
 └── walkthrough.md              # Detailed final changes walkthrough
 ```
-
----
-
-## 🛠️ Compilation & Execution
-
-Since the project is built in pure Java without external dependencies, it compiles and runs out-of-the-box on any computer with Java Development Kit (JDK) installed.
-
-### Standard Command Line
-
-1. Open your terminal or PowerShell inside the `ProteinDomainPredictor` directory.
-2. Compile the files:
-   ```bash
-   javac -d bin src/*.java
-   ```
-3. Run the application:
-   ```bash
-   java -cp bin Main
-   ```
-
-### Running in Eclipse
-1. Import the directory into Eclipse as a **Java Project**.
-2. Right-click [`src/Main.java`](file:///c:/Users/Yash%20katekhaye/eclipse-workspace/ProteinDomainPredictor/src/Main.java) and select **Run As** > **Java Application**.
 
 ---
 
