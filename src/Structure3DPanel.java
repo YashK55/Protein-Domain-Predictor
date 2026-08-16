@@ -34,7 +34,7 @@ public class Structure3DPanel extends JPanel {
     private int hoveredTraceIndex = -1;
 
     public Structure3DPanel() {
-        setBackground(new Color(11, 15, 25)); // Dark slate
+        setBackground(AppTheme.getCanvasBackground());
         setPreferredSize(new Dimension(700, 600));
 
         MouseAdapter mouseHandler = new MouseAdapter() {
@@ -122,12 +122,23 @@ public class Structure3DPanel extends JPanel {
         });
     }
 
+    public List<Trace> getTraces() {
+        return traces;
+    }
+
+    public Color[] getResidueColors() {
+        return residueColors;
+    }
+
     public void setData(List<Trace> traces, Color[] residueColors) {
         this.traces = traces;
         this.residueColors = residueColors;
         this.hoveredPointIndex = -1;
         this.hoveredTraceIndex = -1;
+        resetCamera();
+    }
 
+    public void resetCamera() {
         double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE;
         double minY = Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
         double minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
@@ -159,16 +170,33 @@ public class Structure3DPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g0) {
+        // Dynamically set background
+        setBackground(AppTheme.getCanvasBackground());
         super.paintComponent(g0);
+
         Graphics2D g = (Graphics2D) g0;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int width = getWidth();
         int height = getHeight();
 
+        boolean isLight = AppTheme.getThemeMode() == AppTheme.ThemeMode.LIGHT;
+
         if (traces.isEmpty()) {
-            g.setColor(new Color(156, 163, 175));
-            g.drawString("Run an analysis first, then select Show 3D Superposition.", 20, 30);
+            g.setColor(AppTheme.getText());
+            g.setFont(AppTheme.BODY_BOLD);
+            FontMetrics fm = g.getFontMetrics();
+            String line1 = "No 3D Superposition";
+            String line2 = "Complete the required analysis steps to enable 3D visualization.";
+            
+            int w1 = fm.stringWidth(line1);
+            g.drawString(line1, (width - w1) / 2, height / 2 - 12);
+            
+            g.setFont(AppTheme.BODY);
+            g.setColor(AppTheme.getTextMuted());
+            FontMetrics fm2 = g.getFontMetrics();
+            int w2 = fm2.stringWidth(line2);
+            g.drawString(line2, (width - w2) / 2, height / 2 + 12);
             return;
         }
 
@@ -208,7 +236,7 @@ public class Structure3DPanel extends JPanel {
 
             for (int i = 0; i < n - 1; i++) {
                 Color c = (residueColors != null && i < residueColors.length && residueColors[i] != null)
-                        ? residueColors[i] : new Color(156, 163, 175);
+                        ? residueColors[i] : AppTheme.getTextMuted();
                 g.setColor(c);
                 g.drawLine(px[i], py[i], px[i + 1], py[i + 1]);
             }
@@ -216,17 +244,17 @@ public class Structure3DPanel extends JPanel {
 
         // Draw selection ring for hovered 3D point
         if (highlightPx != -1 && highlightPy != -1) {
-            g.setColor(new Color(255, 255, 255, 100));
+            g.setColor(isLight ? new Color(0, 0, 0, 100) : new Color(255, 255, 255, 100));
             g.setStroke(new BasicStroke(1.5f));
             g.drawOval(highlightPx - 7, highlightPy - 7, 14, 14);
-            g.setColor(Color.CYAN);
+            g.setColor(isLight ? new Color(6, 143, 170) : Color.CYAN);
             g.fillOval(highlightPx - 3, highlightPy - 3, 6, 6);
         }
 
         g.setStroke(new BasicStroke(1.0f)); // reset stroke
 
-        g.setColor(Color.WHITE);
-        g.setFont(g.getFont().deriveFont(Font.BOLD, 14f));
+        g.setColor(AppTheme.getText());
+        g.setFont(AppTheme.BODY_BOLD);
         g.drawString("Superimposed structures (drag to rotate, scroll to zoom)", 15, 22);
 
         // Draw floating information card for hovered 3D element
@@ -237,18 +265,18 @@ public class Structure3DPanel extends JPanel {
             int cardY = height - cardH - 15;
 
             // Semi-transparent panel
-            g.setColor(new Color(17, 24, 39, 230));
+            g.setColor(AppTheme.getSurface());
             g.fillRoundRect(cardX, cardY, cardW, cardH, 10, 10);
-            g.setColor(new Color(255, 255, 255, 30));
+            g.setColor(AppTheme.getBorder());
             g.drawRoundRect(cardX, cardY, cardW - 1, cardH - 1, 10, 10);
 
             // Text entries
-            g.setColor(Color.WHITE);
-            g.setFont(g.getFont().deriveFont(Font.BOLD, 11f));
+            g.setColor(AppTheme.getText());
+            g.setFont(AppTheme.BODY_BOLD);
             g.drawString("Conformer: " + traces.get(hoveredTraceIndex).label, cardX + 12, cardY + 20);
 
-            g.setFont(g.getFont().deriveFont(Font.PLAIN, 10f));
-            g.setColor(new Color(156, 163, 175));
+            g.setFont(AppTheme.SMALL);
+            g.setColor(AppTheme.getTextMuted());
             g.drawString("Residue ID: " + (hoveredPointIndex + 1), cardX + 12, cardY + 38);
 
             Color rc = (residueColors != null && hoveredPointIndex < residueColors.length) ? residueColors[hoveredPointIndex] : null;

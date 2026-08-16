@@ -33,14 +33,11 @@ public class GraphPanel extends JPanel {
         }
     }
 
-    private static final Color DEFAULT_NODE = new Color(99, 102, 241); // Indigo
-    private static final Color DEFAULT_EDGE = new Color(255, 255, 255, 45); // Light transparent gray
-
     private Snapshot snapshot;
     private int hoveredNode = -1;
 
     public GraphPanel() {
-        setBackground(new Color(11, 15, 25)); // Slate background
+        setBackground(AppTheme.getCanvasBackground());
         setPreferredSize(new Dimension(600, 420));
 
         MouseAdapter hoverAdapter = new MouseAdapter() {
@@ -93,18 +90,47 @@ public class GraphPanel extends JPanel {
         repaint();
     }
 
+    private Color adaptColorForTheme(Color c) {
+        if (c == null) return null;
+        boolean isLight = AppTheme.getThemeMode() == AppTheme.ThemeMode.LIGHT;
+        if (isLight) {
+            // Map transparent white to transparent dark slate/black
+            if (c.getRed() >= 240 && c.getGreen() >= 240 && c.getBlue() >= 240) {
+                return new Color(15, 23, 42, Math.max(35, c.getAlpha()));
+            }
+        }
+        return c;
+    }
+
     @Override
     protected void paintComponent(Graphics g0) {
+        // Dynamically set background to match canvas mode background
+        setBackground(AppTheme.getCanvasBackground());
         super.paintComponent(g0);
+
         Graphics2D g = (Graphics2D) g0;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int width = getWidth();
         int height = getHeight();
 
+        boolean isLight = AppTheme.getThemeMode() == AppTheme.ThemeMode.LIGHT;
+
         if (snapshot == null || snapshot.nodeCount == 0) {
-            g.setColor(new Color(156, 163, 175));
-            g.drawString("No graph for this step yet.", 20, 30);
+            g.setColor(AppTheme.getText());
+            g.setFont(AppTheme.BODY_BOLD);
+            FontMetrics fm = g.getFontMetrics();
+            String line1 = "No Visualization Yet";
+            String line2 = "Run the analysis to generate a structural graph.";
+            
+            int w1 = fm.stringWidth(line1);
+            g.drawString(line1, (width - w1) / 2, height / 2 - 12);
+            
+            g.setFont(AppTheme.BODY);
+            g.setColor(AppTheme.getTextMuted());
+            FontMetrics fm2 = g.getFontMetrics();
+            int w2 = fm2.stringWidth(line2);
+            g.drawString(line2, (width - w2) / 2, height / 2 + 12);
             return;
         }
 
@@ -122,6 +148,9 @@ public class GraphPanel extends JPanel {
             ys[i] = cy + radius * Math.sin(angle);
         }
 
+        Color defaultEdge = isLight ? new Color(15, 23, 42, 40) : new Color(255, 255, 255, 30);
+        Color defaultNode = AppTheme.getAccent();
+
         // Draw edges
         for (int i = 0; i < snapshot.edges.size(); i++) {
             int[] e = snapshot.edges.get(i);
@@ -130,17 +159,17 @@ public class GraphPanel extends JPanel {
             if (hoveredNode != -1) {
                 // Focus highlight: if edge connects to hovered node, paint cyan. Otherwise, draw faint.
                 if (e[0] == hoveredNode || e[1] == hoveredNode) {
-                    g.setColor(new Color(6, 182, 212, 220)); // Bright cyan
+                    g.setColor(isLight ? new Color(6, 143, 170, 240) : new Color(6, 182, 212, 220)); // High-contrast cyan
                     g.setStroke(new BasicStroke(2.0f));
                     g.drawLine((int) xs[e[0]], (int) ys[e[0]], (int) xs[e[1]], (int) ys[e[1]]);
                 } else {
-                    g.setColor(new Color(255, 255, 255, 10)); // Very dim edge
+                    g.setColor(isLight ? new Color(15, 23, 42, 10) : new Color(255, 255, 255, 8)); // Very faint edge
                     g.setStroke(new BasicStroke(1.0f));
                     g.drawLine((int) xs[e[0]], (int) ys[e[0]], (int) xs[e[1]], (int) ys[e[1]]);
                 }
             } else {
                 Color ec = (snapshot.edgeColors != null && i < snapshot.edgeColors.length && snapshot.edgeColors[i] != null)
-                        ? snapshot.edgeColors[i] : DEFAULT_EDGE;
+                        ? adaptColorForTheme(snapshot.edgeColors[i]) : defaultEdge;
                 g.setColor(ec);
                 g.setStroke(new BasicStroke(1.0f));
                 g.drawLine((int) xs[e[0]], (int) ys[e[0]], (int) xs[e[1]], (int) ys[e[1]]);
@@ -155,11 +184,11 @@ public class GraphPanel extends JPanel {
         // Draw nodes
         for (int i = 0; i < n; i++) {
             Color nc = (snapshot.nodeColors != null && i < snapshot.nodeColors.length && snapshot.nodeColors[i] != null)
-                    ? snapshot.nodeColors[i] : DEFAULT_NODE;
+                    ? snapshot.nodeColors[i] : defaultNode;
 
             if (i == hoveredNode) {
                 // Glowing outer ring for hovered node
-                g.setColor(new Color(nc.getRed(), nc.getGreen(), nc.getBlue(), 80));
+                g.setColor(new Color(nc.getRed(), nc.getGreen(), nc.getBlue(), isLight ? 60 : 80));
                 g.fill(new Ellipse2D.Double(xs[i] - (nodeSize + 8) / 2.0, ys[i] - (nodeSize + 8) / 2.0, nodeSize + 8, nodeSize + 8));
             }
 
@@ -169,23 +198,23 @@ public class GraphPanel extends JPanel {
             g.fill(circle);
 
             // Node border outline
-            g.setColor(i == hoveredNode ? Color.WHITE : new Color(255, 255, 255, 80));
+            g.setColor(i == hoveredNode ? (isLight ? Color.BLACK : Color.WHITE) : (isLight ? new Color(0, 0, 0, 60) : new Color(255, 255, 255, 80)));
             g.draw(circle);
 
             if (showLabels && snapshot.nodeLabels[i] != null) {
-                g.setColor(i == hoveredNode ? Color.WHITE : new Color(156, 163, 175));
-                g.setFont(g.getFont().deriveFont(10f));
+                g.setColor(i == hoveredNode ? AppTheme.getText() : AppTheme.getTextMuted());
+                g.setFont(AppTheme.SMALL);
                 g.drawString(snapshot.nodeLabels[i], (float) xs[i] + nodeSize, (float) ys[i]);
             }
         }
 
-        g.setColor(Color.WHITE);
-        g.setFont(g.getFont().deriveFont(Font.BOLD, 15f));
+        g.setColor(AppTheme.getText());
+        g.setFont(AppTheme.BODY_BOLD);
         g.drawString(snapshot.title, 15, 22);
 
         if (snapshot.subtitle != null) {
-            g.setFont(g.getFont().deriveFont(Font.PLAIN, 12f));
-            g.setColor(new Color(156, 163, 175));
+            g.setFont(AppTheme.SMALL);
+            g.setColor(AppTheme.getTextMuted());
             g.drawString(snapshot.subtitle, 15, 40);
         }
 
@@ -204,18 +233,18 @@ public class GraphPanel extends JPanel {
             int cardY = height - cardH - 15;
 
             // Semi-transparent panel
-            g.setColor(new Color(17, 24, 39, 230));
+            g.setColor(AppTheme.getSurface());
             g.fillRoundRect(cardX, cardY, cardW, cardH, 10, 10);
-            g.setColor(new Color(255, 255, 255, 30));
+            g.setColor(AppTheme.getBorder());
             g.drawRoundRect(cardX, cardY, cardW - 1, cardH - 1, 10, 10);
 
             // Text entries
-            g.setColor(Color.WHITE);
-            g.setFont(g.getFont().deriveFont(Font.BOLD, 11f));
+            g.setColor(AppTheme.getText());
+            g.setFont(AppTheme.BODY_BOLD);
             g.drawString("Residue ID: " + (hoveredNode + 1), cardX + 12, cardY + 20);
 
-            g.setFont(g.getFont().deriveFont(Font.PLAIN, 10f));
-            g.setColor(new Color(156, 163, 175));
+            g.setFont(AppTheme.SMALL);
+            g.setColor(AppTheme.getTextMuted());
             g.drawString("Group: " + snapshot.nodeLabels[hoveredNode], cardX + 12, cardY + 38);
             g.drawString("Connections: " + connections + " edges", cardX + 12, cardY + 54);
         }
