@@ -51,17 +51,23 @@ public class HomePanel extends JPanel {
 
         // 1. Logo
         JLabel logoLabel = new JLabel();
-        File logoFile = new File("Logo.png");
-        if (logoFile.exists()) {
-            try {
-                ImageIcon origIcon = new ImageIcon(logoFile.getAbsolutePath());
-                if (origIcon.getIconWidth() > 0) {
-                    Image scaled = origIcon.getImage().getScaledInstance(110, 110, Image.SCALE_SMOOTH);
-                    logoLabel.setIcon(new ImageIcon(scaled));
+        try {
+            java.net.URL logoUrl = HomePanel.class.getResource("/Logo.png");
+            ImageIcon origIcon = null;
+            if (logoUrl != null) {
+                origIcon = new ImageIcon(logoUrl);
+            } else {
+                File logoFile = new File("Logo.png");
+                if (logoFile.exists()) {
+                    origIcon = new ImageIcon(logoFile.getAbsolutePath());
                 }
-            } catch (Exception e) {
-                // fall back to no icon
             }
+            if (origIcon != null && origIcon.getIconWidth() > 0) {
+                Image scaled = origIcon.getImage().getScaledInstance(110, 110, Image.SCALE_SMOOTH);
+                logoLabel.setIcon(new ImageIcon(scaled));
+            }
+        } catch (Exception e) {
+            // fall back to no icon
         }
         centerWrapper.add(logoLabel, c);
 

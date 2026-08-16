@@ -1,5 +1,8 @@
-Prompt.md
-Prompt2.md
-Prompt3.md
-
 *.class
+/dist/
+/bin/
+Logo.ico
+ProteinDomainPredictor.jar
+
+# `.\package.bat` To run Code in windows
+# `.\package.sh` To run Code in linux

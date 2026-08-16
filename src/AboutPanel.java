@@ -115,6 +115,11 @@ public class AboutPanel extends JPanel {
                 "<p><b>Version:</b> 2.2.0 (High Contrast Dark/Light UI Redesign)<br>" +
                 "<b>Type:</b> Academic Student Project & Research Tool.</p>" +
                 
+                "<h3>Academic Assignment</h3>" +
+                "<p><b>Course:</b> Assignment for Java Programming<br>" +
+                "<b>Instructor:</b> Monal Pissude<br>" +
+                "<b>Students:</b> Yash Katekhaye, Sujit Mohanty, Aniruddha Naik</p>" +
+                
                 "<h3>Development Credits</h3>" +
                 "<ul>" +
                 "<li>Created and formatted for structural biology alignment and domain decomposition workflows.</li>" +

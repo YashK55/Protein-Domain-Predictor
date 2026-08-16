@@ -27,7 +27,6 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
     private final JToggleButton themeToggle;
     
     private final List<GraphPanel.Snapshot> snapshots = new ArrayList<>();
-    private final AnalysisListener listener;
     
     private final JPanel bottomPanel;
     private final JPanel metadataCol;
@@ -38,7 +37,6 @@ public class AnalysisPanel extends JPanel implements PipelinePanel.PipelineListe
 
     public AnalysisPanel(JFrame parentFrame, GraphPanel graphPanel, Runnable themeSwitcher, AnalysisListener listener) {
         this.graphPanel = graphPanel;
-        this.listener = listener;
 
         // Initialize final variables first
         canvasContainer = new JPanel(new BorderLayout());

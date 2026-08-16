@@ -31,11 +31,6 @@ public class Main {
     // Loaded structures and results cache
     private List<File> loadedFiles;
     private List<String> loadedPdbNames;
-    private List<Character> commonChains;
-    private List<Integer> commonChainResidueCounts;
-
-    private volatile Analyzer.Result lastResult;
-    private volatile List<Structure> lastStructures;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().createWindow());
@@ -47,15 +42,21 @@ public class Main {
         frame.setSize(1280, 800);
         frame.setLocationRelativeTo(null);
 
-        // Load window icon from root directory logo.jpg if it exists
-        File iconFile = new File("Logo.png");
-        if (iconFile.exists()) {
-            try {
-                Image icon = Toolkit.getDefaultToolkit().getImage(iconFile.getAbsolutePath());
+        // Load window icon from resources
+        try {
+            java.net.URL iconUrl = Main.class.getResource("/Logo.png");
+            if (iconUrl != null) {
+                Image icon = Toolkit.getDefaultToolkit().getImage(iconUrl);
                 frame.setIconImage(icon);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                File iconFile = new File("Logo.png");
+                if (iconFile.exists()) {
+                    Image icon = Toolkit.getDefaultToolkit().getImage(iconFile.getAbsolutePath());
+                    frame.setIconImage(icon);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         mainLayout = new CardLayout();
@@ -152,7 +153,7 @@ public class Main {
 
                 List<String> pdbIds = new ArrayList<>();
                 List<File> files = new ArrayList<>();
-                Path data = Path.of("data");
+                Path data = getWritableDataDirectory();
 
                 for (String token : raw.split(",")) {
                     token = token.trim();
@@ -199,8 +200,6 @@ public class Main {
 
                 loadedFiles = files;
                 loadedPdbNames = pdbIds;
-                commonChains = common;
-                commonChainResidueCounts = residueCounts;
 
                 SwingUtilities.invokeLater(() -> {
                     chainSelectionPanel.setChains(common, residueCounts);
@@ -218,7 +217,7 @@ public class Main {
     }
 
     private void loadPdbFilesWorkflow() {
-        JFileChooser chooser = new JFileChooser(new File("data"));
+        JFileChooser chooser = new JFileChooser(getWritableDataDirectory().toFile());
         chooser.setMultiSelectionEnabled(true);
         chooser.setFileFilter(new FileNameExtensionFilter("PDB files", "pdb", "ent"));
 
@@ -270,8 +269,6 @@ public class Main {
 
                 loadedFiles = fileList;
                 loadedPdbNames = fileNames;
-                commonChains = common;
-                commonChainResidueCounts = residueCounts;
 
                 SwingUtilities.invokeLater(() -> {
                     chainSelectionPanel.setChains(common, residueCounts);
@@ -333,9 +330,6 @@ public class Main {
 
                 Analyzer.Result result = analyzer.analyze(structures, 7.5, 3.5, 1.0);
 
-                lastResult = result;
-                lastStructures = structures;
-
                 // Complete remaining pipeline statuses
                 analysisPanel.setStepStatus(1, PipelinePanel.StepStatus.COMPLETED);
                 analysisPanel.setStepStatus(2, PipelinePanel.StepStatus.COMPLETED);
@@ -363,9 +357,6 @@ public class Main {
                         append(r.number + (r.insertionCode == ' ' ? "" : String.valueOf(r.insertionCode)) + r.name + (i == residues.size() - 1 ? "" : ", "));
                     }
                     append("\n");
-
-                    Residue first = result.alignedResidues.get(0).get(residues.get(0));
-                    Residue last = result.alignedResidues.get(0).get(residues.get(residues.size() - 1));
                 }
 
                 append("\nAnalysis complete.\n");
@@ -553,5 +544,21 @@ public class Main {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
+    }
+
+    private static Path getWritableDataDirectory() {
+        String userHome = System.getProperty("user.home");
+        Path path = Path.of(userHome, ".proteindomainpredictor", "data");
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            path = Path.of("data");
+            try {
+                Files.createDirectories(path);
+            } catch (IOException ex) {
+                // ignore
+            }
+        }
+        return path;
     }
 }
