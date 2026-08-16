@@ -3,6 +3,8 @@
 /bin/
 Logo.ico
 ProteinDomainPredictor.jar
+ProteinDomainPredictor-Setup.exe
+*.exe
 
 # `.\package.bat` To run Code in windows
 # `.\package.sh` To run Code in linux

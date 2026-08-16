@@ -1,19 +1,27 @@
 # Protein Domain Predictor
 
-A high-performance, dark-themed Java Swing desktop application implementing the multi-conformation graph-based rigid domain decomposition workflow described by **Dang et al. (2021)**.
+A high-performance, dual-themed (Light/Dark) Java Swing desktop application implementing the multi-conformation graph-based rigid domain decomposition workflow described by **Dang et al. (2021)**.
 
 The tool identifies rigid structural domains and hinge boundaries by modeling proteins as contact graphs and using Louvain community partitioning, Line Graph variance mapping, Median Absolute Deviation (MAD) outlier detection, and Viterbi optimization.
 
 ---
 
+## 💾 Download Standalone Installer
+
+You can download the compiled Windows installer directly from the repository root:
+
+[![Download Setup EXE](https://img.shields.io/badge/Download-Windows%20Installer-blue?style=for-the-badge&logo=windows&logoColor=white)](ProteinDomainPredictor-Setup.exe)
+
+---
+
 ## 🚀 Key Features
 
-*   **Sleek Dark Theme UI**: Custom anti-aliased rounded widgets (`RoundButton` and `RoundTextField`) and charcoal cards with a clean modern layout.
-*   **Step-wise Chain Auto-Detection**: Enter PDB IDs or select local files, and the app will scan the structures, detect all coordinates chain identifiers, and prompt you to select specific chains before running analysis.
-*   **Interactive 2D Network Canvas**: Interactive circular layouts for pipeline stages. Hovering over nodes highlights edge paths and displays residue indexes, group memberships, and degrees.
-*   **Interactive 3D Superposition Canvas**: Overlay multiple conformers (aligned via Kabsch algorithm) directly within the main window. Hovering over the trace displays conformer names, residue IDs, and predicted domain bounds.
+*   **Dual Theme UI (Light/Dark Mode)**: Custom anti-aliased rounded widgets (`RoundedButton` and `RoundedTextField`) and responsive panels supporting seamless light and dark mode switching with high-contrast visualization canvases.
+*   **Step-wise Chain Auto-Detection**: Enter PDB IDs or select local files, and the app will scan the structures, detect all common chain identifiers, and prompt you to select specific chains before running analysis.
+*   **Interactive 2D Network Canvas**: Interactive circular layouts for pipeline stages. Hovering over nodes highlights edge paths and displays residue indexes, group memberships, and degree connectivity in real-time.
+*   **Vector Icons Integration**: Native vector-drawn components (`ThemeIcon`, `ArrowIcon`, `StatusIcon`) to provide seamless resolution scalability without emoji dependencies.
 *   **Algorithmic Optimization**: Louvain partitioning optimized from $O(N)$ community size scans to $O(1)$ size caching, delivering massive performance boosts.
-*   **Zero Dependencies**: Written in pure Java Swing/AWT (no external Jars needed).
+*   **Zero External Dependencies**: Written in pure Java Swing/AWT (no external JARs needed).
 
 ---
 
@@ -23,14 +31,21 @@ The tool identifies rigid structural domains and hinge boundaries by modeling pr
 ProteinDomainPredictor/
 ├── data/                       # Local PDB cache directory
 ├── src/                        # Java source directory
+│   ├── AboutPanel.java         # About & Changelog panel layout (GridBagLayout)
+│   ├── AnalysisPanel.java      # Guided Analysis Panel
 │   ├── Analyzer.java           # Math core: Contact graph, Louvain, MAD, Viterbi
+│   ├── AppTheme.java           # Color modes, vector icons, & custom widgets
+│   ├── ChainSelectionPanel.java# Inter-structure chain selection view
 │   ├── GraphPanel.java         # Interactive 2D circular network graph renderer
-│   ├── Main.java               # App entry point, Tabbed GUI, & rounded styles
+│   ├── HomePanel.java          # Central home screen panel
+│   ├── Main.java               # App entry point, frame coordinator, & theme switcher
+│   ├── PipelinePanel.java      # Left pipeline step navigation panel
+│   ├── ProcessingPanel.java    # Progress loader panel with custom vector status icons
 │   ├── Residue.java            # C-alpha residue coordinates data model
-│   ├── Structure.java          # Download manager and standard PDB coordinate parser
-│   ├── Structure3DPanel.java   # Orbit-controlled orthographic 3D trace visualizer
-│   └── Superposition.java      # Kabsch structural translation & alignment solver
-├── logo.jpg                    # High-quality stylized app icon
+│   └── Structure.java          # Download manager and standard PDB coordinate parser
+├── Logo.ico                    # Windows installer icon
+├── Logo.png                    # High-quality app logo
+├── ProteinDomainPredictor-Setup.exe # Standalone Windows installer executable
 ├── README.md                   # Core project documentation
 └── walkthrough.md              # Detailed final changes walkthrough
 ```
@@ -46,11 +61,11 @@ Since the project is built in pure Java without external dependencies, it compil
 1. Open your terminal or PowerShell inside the `ProteinDomainPredictor` directory.
 2. Compile the files:
    ```bash
-   javac src/*.java
+   javac -d bin src/*.java
    ```
 3. Run the application:
    ```bash
-   java -cp src Main
+   java -cp bin Main
    ```
 
 ### Running in Eclipse
